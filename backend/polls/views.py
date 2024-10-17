@@ -4,8 +4,12 @@ from django.contrib.auth.models import User
 
 from rest_framework import generics, status
 from rest_framework.response import Response
+
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+
 from .models import TestModel, PollModel
-from .serializers import TestModelSerializer, PollModelSerializer, UserSerializer
+from .serializers import TestModelSerializer, PollModelSerializer, UserSerializer, LoginSerializer
 from django.shortcuts import get_object_or_404
 
 from bson import ObjectId
@@ -85,3 +89,24 @@ class UserCreate(generics.CreateAPIView):
         self.perform_create(serializer)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED) # Returns object and status code
+    
+# Used to login and authenticate users
+class UserLogin(ObtainAuthToken):
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Assign the validated user data to user 
+        user = serializer.validated_data["user"]
+
+        # Unpacking the tuple with token and created 
+        token, created = Token.objects.get_or_create(user=user)
+
+        # After authenticating, return the token and user details
+        return Response({
+            "token": token.key,
+            "user_id": user.id,
+            "email": user.email
+        })

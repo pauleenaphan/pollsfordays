@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import TestModelListCreate, TestModelDetail, PollModelCreate, PollModelDetails, UserCreate # imports view classes we defined
+from .views import TestModelListCreate, TestModelDetail, PollModelCreate, PollModelDetails, UserCreate, UserLogin # imports view classes we defined
 
 
 # Routing list that django uses to match incoming request
@@ -12,5 +12,6 @@ urlpatterns = [
     path("pollmodels/", PollModelCreate.as_view(), name="pollmodel-create"),
     path("pollmodels/<str:_id>/", PollModelDetails.as_view(), name="pollmodel-details"),
 
-    path("signup/", UserCreate.as_view(), name="user-register")
+    path("signup/", UserCreate.as_view(), name="user-signup"),
+    path("login/", UserLogin.as_view(), name="user-login")
 ]

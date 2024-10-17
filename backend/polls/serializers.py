@@ -53,3 +53,28 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data["password"]  # Hashes password automatically
         )
         return user
+    
+# Need a login serializer so we can only get the email and password
+# If we were to use the UserSerializer then we would also need to include username
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        if email and password:
+            # Check if the user exists
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise serializers.ValidationError("User with this email does not exist.")
+            
+            # Validate the password
+            if not user.check_password(password):
+                raise serializers.ValidationError("Incorrect password.")
+
+            # If credentials are valid, return the user object
+            data['user'] = user
+        return data
