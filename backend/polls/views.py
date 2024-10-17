@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 
 from rest_framework import generics
+from rest_framework.response import Response
 from .models import TestModel, PollModel
 from .serializers import TestModelSerializer, PollModelSerializer
 from django.shortcuts import get_object_or_404
@@ -41,6 +42,8 @@ class PollModelCreate(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
 
+# Super is a method from the parent class that contains the default for updating an object
+
 class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = PollModel.objects.all()
     serializer_class = PollModelSerializer
@@ -53,4 +56,18 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
             return self.queryset.get(_id=ObjectId(_id))
         except (PollModel.DoesNotExist, Exception):
             raise Http404("PollModel not found.")  # Raise 404 if not found
-        
+
+    # asterisks are used to capture extra arugments, if we remove them then only one arg can be passsed in
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()  # Get the current instance
+        serializer = self.get_serializer(instance, data=request.data, partial=True) # Use serializer to convert our data
+        serializer.is_valid(raise_exception=True)  # Checks if the data is valid
+        self.perform_update(serializer)  # Save the updated instance
+
+        print("Poll has been updated", request.data)
+        return Response(serializer.data)  # Return the updated data
+    
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        print("Poll has been removed", request.data)
+        return response

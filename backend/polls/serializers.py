@@ -10,6 +10,8 @@ from .models import TestModel, PollModel # import our model
 # Refers to the process of converting complex python objects to data structure
 
 # self: allows method to access attributes of the instance of the class
+# super(): use method from parent class
+# to_representation: takes data and converts it into a format that is sent to user
 
 class TestModelSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='_id', read_only=True)  # Include the id field
