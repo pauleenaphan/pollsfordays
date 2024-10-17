@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
+from django.contrib.auth.models import User
 
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import TestModel, PollModel
-from .serializers import TestModelSerializer, PollModelSerializer
+from .serializers import TestModelSerializer, PollModelSerializer, UserSerializer
 from django.shortcuts import get_object_or_404
 
 from bson import ObjectId
@@ -35,6 +36,7 @@ class TestModelDetail(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(TestModel, name=name)
     
 
+# Used to create and view polls
 class PollModelCreate(generics.ListCreateAPIView):
     queryset = PollModel.objects.all()
     serializer_class = PollModelSerializer
@@ -43,7 +45,7 @@ class PollModelCreate(generics.ListCreateAPIView):
         serializer.save()
 
 # Super is a method from the parent class that contains the default for updating an object
-
+# Used to get, update, and delete polls
 class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = PollModel.objects.all()
     serializer_class = PollModelSerializer
@@ -71,3 +73,15 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
         response = super().destroy(request, *args, **kwargs)
         print("Poll has been removed", request.data)
         return response
+    
+# Used to create new Users
+class UserCreate(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer # specifiies that userseralizer will be used
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED) # Returns object and status code
