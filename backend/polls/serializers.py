@@ -31,5 +31,5 @@ class PollModelSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return super().to_representation(instance)
-
+        
     

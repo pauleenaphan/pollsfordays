@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 
 from rest_framework import generics
 from .models import TestModel, PollModel
 from .serializers import TestModelSerializer, PollModelSerializer
 from django.shortcuts import get_object_or_404
+
+from bson import ObjectId
 
 # Create your views here.
 def index(request):
@@ -26,6 +28,7 @@ class TestModelDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TestModelSerializer
     
     # Override this method to fetch the object by 'name'
+    # get_object is HOW you get the values of the object
     def get_object(self):
         name = self.kwargs['name']
         return get_object_or_404(TestModel, name=name)
@@ -44,4 +47,10 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "_id"
 
     def get_object(self):
-        return super().get_object() # Fetches any objects based on URL params
+        _id = self.kwargs.get(self.lookup_field)  # Get the _id from URL parameters
+        try:
+            # Convert the string _id to ObjectId for querying
+            return self.queryset.get(_id=ObjectId(_id))
+        except (PollModel.DoesNotExist, Exception):
+            raise Http404("PollModel not found.")  # Raise 404 if not found
+        
