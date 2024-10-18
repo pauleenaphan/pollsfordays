@@ -31,26 +31,48 @@ const Signup = () =>{
     const handleSubmit = async (e: FormEvent) =>{
         e.preventDefault();
         const { email, username, password } = userData;
-
-        if(password != userData.confirmPass){
+    
+        if(password !== userData.confirmPass){
             setSignupStatus("Passwords don't match");
-            return
+            return;
         }
-
+    
         try{
-            const response = await fetch("http://localhost:8000/api/signup/", {
+            const signupResponse = await fetch("http://localhost:8000/api/signup/", {
                 method: "POST",
-                headers: {
+                headers:{
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ email, username, password })
-            })
-            if(response.ok){
-                alert("user is signing up")
-                navigate("/homepage");
-                localStorage.setItem("isLoggedIn", "true");
+            });
+    
+            if(signupResponse.ok){
+                // Now log the user in immediately after signup
+                const loginResponse = await fetch("http://localhost:8000/api/login/", {
+                    method: "POST",
+                    headers:{
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }) // Use the same email and password
+                });
+    
+                if(loginResponse.ok){
+                    const data = await loginResponse.json(); // Get the token from the response
+                    localStorage.setItem("token", data.token); 
+                    localStorage.setItem("isLoggedIn", "true");
+                    alert("User signed up and logged in!");
+                    navigate("/homepage");
+                }else{
+                    const loginError = await loginResponse.json();
+                    setSignupStatus(loginError.detail || "Login failed");
+                }
+            }else{
+                const signupError = await signupResponse.json();
+                setSignupStatus(signupError.detail || "Signup failed");
             }
-        }catch(error){ console.error("Error signing up", error); }
+        }catch(error){
+            console.error("Error signing up", error);
+        }
     }
 
     return(
