@@ -23,11 +23,31 @@ const Login = () =>{
             [postField]: userInput
         }))
     }
+
+    const handleSubmit = async (e: FormEvent) =>{
+        e.preventDefault();
+        const { email, password } = userData;
+
+        try{
+            const response = await fetch("http://localhost:8000/api/login/", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password })
+            })
+            if(response.ok){
+                alert("using is logging in");
+                navigate("/homepage");
+                localStorage.setItem("isLoggedIn", "true")
+            }
+        }catch(error){ console.error("Error signing in", error)}
+    }
     
     return(
         <>
             <h1> login </h1>
-            <form className="loginForm">
+            <form className="loginForm" onSubmit={handleSubmit}>
                 <div className="inputContainer">
                     <label> Email: </label>
                     <input 
@@ -43,6 +63,7 @@ const Login = () =>{
                         type="password" 
                         placeholder="Password"
                         onChange={(e) => updateUserData('password', e.target.value)}
+                        required={true}
                     ></input>
                 </div>
                 

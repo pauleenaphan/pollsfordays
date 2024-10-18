@@ -28,10 +28,29 @@ const Signup = () =>{
         }))
     }
 
-    const handleSubmit = (e: FormEvent) =>{
+    const handleSubmit = async (e: FormEvent) =>{
         e.preventDefault();
-        const { email, username, password, confirmPass } = userData;
+        const { email, username, password } = userData;
 
+        if(password != userData.confirmPass){
+            setSignupStatus("Passwords don't match");
+            return
+        }
+
+        try{
+            const response = await fetch("http://localhost:8000/api/signup/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, username, password })
+            })
+            if(response.ok){
+                alert("user is signing up")
+                navigate("/homepage");
+                localStorage.setItem("isLoggedIn", "true");
+            }
+        }catch(error){ console.error("Error signing up", error); }
     }
 
     return(
@@ -76,6 +95,7 @@ const Signup = () =>{
                 </div>
                 <button className="signupBtn" type="submit"> Signup </button>
             </form>
+            <p> {signupStatus} </p>
 
             <div>
                 <p> Already have an account? </p>
