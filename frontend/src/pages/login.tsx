@@ -37,9 +37,13 @@ const Login = () =>{
                 body: JSON.stringify({ email, password })
             })
             if(response.ok){
+                const data = await response.json();
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("token", data.token); 
+                localStorage.setItem("username", data.username);
                 alert("using is logging in");
                 navigate("/homepage");
-                localStorage.setItem("isLoggedIn", "true")
+                
             }
         }catch(error){ console.error("Error signing in", error)}
     }

@@ -4,9 +4,11 @@ from django.contrib.auth.models import User
 
 from rest_framework import generics, status
 from rest_framework.response import Response
-
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 from .models import TestModel, PollModel
 from .serializers import TestModelSerializer, PollModelSerializer, UserSerializer, LoginSerializer
@@ -39,14 +41,22 @@ class TestModelDetail(generics.RetrieveUpdateDestroyAPIView):
         name = self.kwargs['name']
         return get_object_or_404(TestModel, name=name)
     
-
 # Used to create and view polls
 class PollModelCreate(generics.ListCreateAPIView):
     queryset = PollModel.objects.all()
     serializer_class = PollModelSerializer
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    permission_classes = [AllowAny] 
 
     def perform_create(self, serializer):
         serializer.save()
+
+class PollModelList(generics.ListAPIView):
+    queryset = PollModel.objects.all()
+    serializer_class = PollModelSerializer
+    permission_classes = [AllowAny] 
 
 # Super is a method from the parent class that contains the default for updating an object
 # Used to get, update, and delete polls
@@ -54,6 +64,8 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = PollModel.objects.all()
     serializer_class = PollModelSerializer
     lookup_field = "_id"
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         _id = self.kwargs.get(self.lookup_field)  # Get the _id from URL parameters
@@ -82,6 +94,7 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
 class UserCreate(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer # specifiies that userseralizer will be used
+    permission_classes = [AllowAny] # Allows anyone to access view 
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -108,5 +121,6 @@ class UserLogin(ObtainAuthToken):
         return Response({
             "token": token.key,
             "user_id": user.id,
-            "email": user.email
+            "email": user.email,
+            "username": user.username
         })

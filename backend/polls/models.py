@@ -13,10 +13,10 @@ class TestModel(models.Model):
 class PollModel(models.Model):
     _id = models.ObjectIdField(default=ObjectId, editable=False, primary_key=True)
     title = models.CharField(max_length=500, blank=False)
-    choices = models.JSONField(max_length=100) # list field makes the option and array
+    choices = models.JSONField()  # list field makes the option and array
     author = models.CharField(max_length=20)
     timeLimit = models.IntegerField()  # Stores a single integer, like minutes or hours
-    datePosted = models.IntegerField()  # Stores the date as an integer (like timestamp)
+    datePosted = models.CharField(max_length=500, blank=False)  # Stores the date as an integer (like timestamp)
 
     def clean(self):
         super().clean()

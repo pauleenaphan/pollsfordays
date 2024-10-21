@@ -60,6 +60,7 @@ const Signup = () =>{
                     const data = await loginResponse.json(); // Get the token from the response
                     localStorage.setItem("token", data.token); 
                     localStorage.setItem("isLoggedIn", "true");
+                    localStorage.setItem("username", data.username);
                     alert("User signed up and logged in!");
                     navigate("/homepage");
                 }else{
