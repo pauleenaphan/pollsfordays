@@ -17,6 +17,7 @@ class PollModel(models.Model):
     author = models.CharField(max_length=20)
     timeLimit = models.IntegerField()  # Stores a single integer, like minutes or hours
     datePosted = models.CharField(max_length=500, blank=False)  # Stores the date as an integer (like timestamp)
+    voters = models.JSONField(default=list) # list of ppl who voted already
 
     def clean(self):
         super().clean()

@@ -64,8 +64,9 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = PollModel.objects.all()
     serializer_class = PollModelSerializer
     lookup_field = "_id"
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] 
 
     def get_object(self):
         _id = self.kwargs.get(self.lookup_field)  # Get the _id from URL parameters
@@ -77,6 +78,7 @@ class PollModelDetails(generics.RetrieveUpdateDestroyAPIView):
 
     # asterisks are used to capture extra arugments, if we remove them then only one arg can be passsed in
     def update(self, request, *args, **kwargs):
+        print("Request data:", request.data) 
         instance = self.get_object()  # Get the current instance
         serializer = self.get_serializer(instance, data=request.data, partial=True) # Use serializer to convert our data
         serializer.is_valid(raise_exception=True)  # Checks if the data is valid

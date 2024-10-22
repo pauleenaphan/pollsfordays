@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User # Django builtin user Model
 from .models import TestModel, PollModel # import our model
+import json
 
 # Serializers: 
 # Used to convert complex data types into native python data types
@@ -33,9 +34,17 @@ class PollModelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def to_representation(self, instance):
-        return super().to_representation(instance)
-        
+        # Get the original representation
+        representation = super().to_representation(instance)
 
+        # Convert the 'choices' field from a string to an array
+        choices_str = representation.get('choices')
+        if isinstance(choices_str, str):
+            # Replace single quotes with double quotes for valid JSON and parse to list
+            choices_array = json.loads(choices_str.replace("'", '"'))
+            representation['choices'] = choices_array
+
+        return representation
 class UserSerializer(serializers.ModelSerializer):
     # password is built in but we want to make it write_only so we create a new one
     password = serializers.CharField(write_only=True)
